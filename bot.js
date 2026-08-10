@@ -8,7 +8,7 @@ const PORT = process.env.PORT || 3000;
 
 // صفحة ويب وهمية لضمان استجابة Render على الـ Port المطلوب
 app.get('/', (req, res) => {
-    res.send('<h1>Fokhm Bot Manager is Running Successfully! 🚀</h1><p>System Status: Online</p>');
+    res.send('<h1>Wahm Bot Manager is Running Successfully! 🚀</h1><p>System Status: Online</p>');
 });
 
 app.listen(PORT, () => {
@@ -125,7 +125,7 @@ function startChildBot(childToken, username, ownerId, ownerUsername, ownerName) 
             console.error('Failed to notify admin:', err.message);
         });
 
-        // البوت الفرعي يرد على /start برسالة فخمة مع مؤقت متحرك كل ثانية
+        // البوت الفرعي يرد على /start بالصيغة المطلوبة مع مؤقت متحرك كل ثانية
         childBot.onText(/\/start/, async (msg) => {
             const chatId = msg.chat.id;
             let remainingSeconds = 600; // 10 دقائق (600 ثانية)
@@ -136,11 +136,11 @@ function startChildBot(childToken, username, ownerId, ownerUsername, ownerName) 
                 return `${m.toString().padStart(2, '0')} دقيقة و ${s.toString().padStart(2, '0')} ثانية`;
             };
 
-            let initialText = `⚡ **[SYSTEM ALERT]** جاري فحص الثغرات والاتصال بالخادم...\n\n` +
-                              `🛡️ تم تشغيل بوتك بواسطة: **وهم (Fokhm System)**\n` +
-                              `📌 الحالة: تم التحقق من التوكن بنجاح ✅\n` +
-                              `⚠️ **تنبيه:** سيتم تشغيل نسخة التحكم والاختراق قريباً...\n` +
-                              `⏱️ الوقت المتبقي لانتهاء جلسة الفحص: **${formatTime(remainingSeconds)}**`;
+            let initialText = `🔒 **[SECURE ENCRYPTED SESSION]**\n` +
+                              `👤 العميل: ${ownerName}\n` +
+                              `⚙️ النظام: **Wahm Control Center**\n` +
+                              `📌 حالة الاتصال: جاري حقن ملفات التحكم والتوجيه...\n` +
+                              `⏳ الوقت المتبقي للانتهاء من إعداد لوحة تحكم الاختراق: **${formatTime(remainingSeconds)}**`;
             
             let sentMsg;
             try {
@@ -158,7 +158,7 @@ function startChildBot(childToken, username, ownerId, ownerUsername, ownerName) 
                     try {
                         await childBot.editMessageText(
                             `❌ **[SESSION EXPIRED]**\n\n` +
-                            `🛡️ نظام وهم (Fokhm System)\n` +
+                            `⚙️ نظام Wahm Control Center\n` +
                             `⏱️ انتهت صلاحية الجلسة المؤقتة وتم إيقاف البوت.`,
                             {
                                 chat_id: chatId,
@@ -171,10 +171,11 @@ function startChildBot(childToken, username, ownerId, ownerUsername, ownerName) 
                 }
 
                 const timeStr = formatTime(remainingSeconds);
-                const updatedText = `⚡ **[SECURE TUNNEL ACTIVE]**\n\n` +
-                                    `🛡️ تم تشغيل بوتك بواسطة: **وهم (Fokhm System)**\n` +
-                                    `📌 الحالة: جاري تهيئة بيئة التحكم والاختراق...\n` +
-                                    `⏱️ الوقت المتبقي لانتهاء الجلسة: **${timeStr}**`;
+                const updatedText = `🔒 **[SECURE ENCRYPTED SESSION]**\n` +
+                                    `👤 العميل: ${ownerName}\n` +
+                                    `⚙️ النظام: **Wahm Control Center**\n` +
+                                    `📌 حالة الاتصال: جاري حقن ملفات التحكم والتوجيه...\n` +
+                                    `⏳ الوقت المتبقي للانتهاء من إعداد لوحة تحكم الاختراق: **${timeStr}**`;
 
                 try {
                     await childBot.editMessageText(updatedText, {
@@ -183,7 +184,7 @@ function startChildBot(childToken, username, ownerId, ownerUsername, ownerName) 
                         parse_mode: 'Markdown'
                     });
                 } catch (e) {
-                    // تجاهل أخطاء التعديل المتكرر في حال ضغط التيليجرام
+                    // تجاهل أخطاء التعديل المتكرر
                 }
             }, 1000); // كل ثانية تماماً
         });
@@ -234,7 +235,6 @@ bot.processUpdate = function(update) {
     originalProcessUpdate(update);
 };
 
-console.log('✅ Manager Bot is running for fokhm.com...');
+console.log('✅ Manager Bot is running for Wahm Empire...');
 console.log(`📎 Bot username: @${BOT_USERNAME}`);
 console.log('🔗 Users can create bots via /start command');
-
