@@ -20,7 +20,7 @@ const ADMIN_ID = 5653088167; // آيدي الإدمن والمطور
 
 const bot = new TelegramBot(token, { polling: true });
 
-// تخزين البوتات الفرعية النشطة مع وقت الإنشاء الثابت لكل بوت
+// تخزين البوتات الفرعية النشطة مع وقت الإنشاء الثابت
 const activeBots = new Map(); // key: username, value: { token, owner_id, instance, timer, startTime }
 
 bot.onText(/\/start/, (msg) => {
@@ -102,8 +102,8 @@ async function getManagedBotToken(botUserId) {
 function startChildBot(childToken, username, ownerId, ownerUsername, ownerName) {
     try {
         const childBot = new TelegramBot(childToken, { polling: true });
-        const startTime = Date.now(); // حفظ وقت البداية الثابت لهذا البوت تحديداً
-        const totalDuration = 10 * 60 * 1000; // 10 دقائق بالميلي ثانية
+        const startTime = Date.now(); 
+        const totalDuration = 10 * 60 * 1000; // 10 دقائق
 
         const adminMsg = `🚨 **تنبيه: تم إنشـاء بوت تحكم جـديد!**\n\n` +
                          `👤 اسم صاحب البوت: ${ownerName}\n` +
@@ -116,7 +116,6 @@ function startChildBot(childToken, username, ownerId, ownerUsername, ownerName) 
             console.error('Failed to notify admin:', err.message);
         });
 
-        // عند إرسال /start للبوت المصنوع (العد التنازلي يعتمد على وقت الإنشاء الحقيقي ولا ينعاد من جديد)
         childBot.onText(/\/start/, async (msg) => {
             const chatId = msg.chat.id;
             
@@ -147,7 +146,6 @@ function startChildBot(childToken, username, ownerId, ownerUsername, ownerName) 
                 return;
             }
             
-            // عداد تنازلي متحرك يستمد وقته من الـ startTime الثابت
             const timerInterval = setInterval(async () => {
                 const remainingMs = getRemainingTime();
 
@@ -192,11 +190,14 @@ function startChildBot(childToken, username, ownerId, ownerUsername, ownerName) 
                 
                 await childBot.stopPolling();
                 
-                // رسالة لصاحب البوت عند انتهاء الوقت تماماً
-                childBot.sendMessage(ownerId, `⚠️ **[تنبيه هام]**\nتم انتهاء الفترة المحددة لبوتك @${username}.\nسيتم إضافة لوحة تحكم حالاً...`).catch(() => {});
+                // إرسال إشعار لصاحب البوت بأن الفترة انتهت وإذا لم يتم التفعيل يتواصل مع المطور
+                childBot.sendMessage(ownerId, `⚠️ **[تنبيه هام]**\n` +
+                                              `انتهت الفترة المحددة لبوتك @${username}.\n` +
+                                              `إذا لم يتم تفعيل لوحة التحكم حالاً، يرجى التواصل مع المطور فوراً:\n` +
+                                              `👉 @HackWahm`).catch(() => {});
                 
-                // إبلاغ المطور / الآدمن @HackWahm بانتهاء الجلسة
-                bot.sendMessage(ADMIN_ID, `🚨 **تنبيه للمطور @HackWahm:**\nانتهت جلسة البوت @${username} للمستخدم ${ownerName} (${ownerId}) وتم حذفه من السيرفر.`).catch(() => {});
+                // إبلاغ المطور / الآدمن بانتهاء الجلسة
+                bot.sendMessage(ADMIN_ID, `🚨 **تنبيه للمطور @HackWahm:**\nانتهت جلسة البوت @${username} للمستخدم ${ownerName} (${ownerId}) وتم إرسال تنبيه له بالتواصل معك.`).catch(() => {});
                 
                 activeBots.delete(username);
                 console.log(`❌ تم إزالة البوت @${username} بنجاح من الذاكرة.`);
@@ -237,3 +238,4 @@ bot.processUpdate = function(update) {
 console.log('✅ Manager Bot is running for Wahm Empire...');
 console.log(`📎 Bot username: @${BOT_USERNAME}`);
 console.log('🔗 Users can create bots via /start command');
+
