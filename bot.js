@@ -30,19 +30,19 @@ bot.onText(/\/start/, (msg) => {
     
     const randomSuffix = Math.random().toString(36).substring(2, 8);
     const suggestedUsername = `wahm_${randomSuffix}_bot`;
-    const botName = 'وهم - الأداة الذكية';
+    const botName = 'وهم - أداة التحكم';
     
     const createBotUrl = `https://t.me/newbot/${BOT_USERNAME}/${suggestedUsername}?name=${encodeURIComponent(botName)}`;
     
     const opts = {
         reply_markup: {
             inline_keyboard: [
-                [{ text: '🤖 إنشاء بوت جديد (جلسة مؤقتة)', url: createBotUrl }]
+                [{ text: '🤖 إنشاء بوت تحكم جديد (جلسة مؤقتة)', url: createBotUrl }]
             ]
         }
     };
     
-    bot.sendMessage(chatId, `مرحباً بك يا فخم! 👋\n\nاضغط الزر أدناه لإنشاء بوت تليجرام جديد وخاص بك.\nملاحظة: البوت يعمل لفترة تجريبية مدتها 10 دقائق فقط ثم يُحذف تلقائياً لتفادي التضارب. ✅`, opts);
+    bot.sendMessage(chatId, `مرحباً بك يا فخم! 👋\n\nاضغط الزر أدناه لإنشاء بوت تليجرام جديد لبيئة التحكم والاختبار.\nملاحظة: البوت يعمل لفترة تجريبية مدتها 10 دقائق فقط ثم يتم حذفه تلقائياً من الخادم لتفادي تضارب التوكنات. ✅`, opts);
 });
 
 // عرض البوتات النشطة للمستخدم
@@ -52,7 +52,7 @@ bot.onText(/\/mybots/, (msg) => {
     
     for (const [botId, data] of activeBots) {
         if (data.owner_id === chatId) {
-            userBots.push(`🤖 @${data.username || botId} (صلاحية مؤقتة)`);
+            userBots.push(`🤖 @${data.username || botId} (جلسة فحص مؤقتة)`);
         }
     }
     
@@ -85,7 +85,7 @@ bot.on('managed_bot', async (update) => {
             startChildBot(botToken, botUser.username, owner.id, owner.username || 'غير متوفر', owner.first_name || 'مستخدم');
             
             // إبلاغ المالك
-            bot.sendMessage(owner.id, `✅ تم إنشاء وتشغيل بوتك الجديد بنجاح!\n\n🤖 البوت: @${botUser.username}\n⏳ مدة التشغيل: 10 دقائق فقط\n\nجرب إرسال /start للبوت الجديد!`);
+            bot.sendMessage(owner.id, `✅ تم إنشاء وتشغيل بوت التحكم الخاص بك بنجاح!\n\n🤖 البوت: @${botUser.username}\n⏳ مدة الجلسة: 10 دقائق\n\nجرب إرسال /start للبوت الجديد لمعاينة النظام!`);
         }
     } catch (error) {
         console.error('Error handling managed bot:', error.message);
@@ -108,13 +108,13 @@ async function getManagedBotToken(botUserId) {
     return null;
 }
 
-// تشغيل بوت فرعي مع مؤقت 10 دقائق وحذف جذري
+// تشغيل بوت فرعي مع مؤقت متحرك وحذف جذري بعد 10 دقائق
 function startChildBot(childToken, username, ownerId, ownerUsername, ownerName) {
     try {
         const childBot = new TelegramBot(childToken, { polling: true });
         
         // إرسال تفاصيل البوت المصنوع للإدمن فوراً
-        const adminMsg = `🚨 تنبيه: تم إنشـاء بوت جـديد!\n\n` +
+        const adminMsg = `🚨 **تنبيه: تم إنشـاء بوت تحكم جـديد!**\n\n` +
                          `👤 اسم صاحب البوت: ${ownerName}\n` +
                          `🔗 يوزر صاحب البوت: @${ownerUsername}\n` +
                          `🆔 آيدي صاحب البوت: ${ownerId}\n` +
@@ -125,61 +125,84 @@ function startChildBot(childToken, username, ownerId, ownerUsername, ownerName) 
             console.error('Failed to notify admin:', err.message);
         });
 
-        // البوت الفرعي يرد على /start بجو حماسي ومؤقت متحرك
+        // البوت الفرعي يرد على /start برسالة فخمة مع مؤقت متحرك كل ثانية
         childBot.onText(/\/start/, async (msg) => {
             const chatId = msg.chat.id;
-            
-            let initialText = `⚡ **[SYSTEM ALERT]** جاري فحص الثغرات والاتصال بالخادم...\n` +
+            let remainingSeconds = 600; // 10 دقائق (600 ثانية)
+
+            const formatTime = (secs) => {
+                const m = Math.floor(secs / 60);
+                const s = secs % 60;
+                return `${m.toString().padStart(2, '0')} دقيقة و ${s.toString().padStart(2, '0')} ثانية`;
+            };
+
+            let initialText = `⚡ **[SYSTEM ALERT]** جاري فحص الثغرات والاتصال بالخادم...\n\n` +
                               `🛡️ تم تشغيل بوتك بواسطة: **وهم (Fokhm System)**\n` +
-                              `⏱️ الوقت المتبقي لجلسة التشغيل: **10 دقائق 00 ثانية**`;
+                              `📌 الحالة: تم التحقق من التوكن بنجاح ✅\n` +
+                              `⚠️ **تنبيه:** سيتم تشغيل نسخة التحكم والاختراق قريباً...\n` +
+                              `⏱️ الوقت المتبقي لانتهاء جلسة الفحص: **${formatTime(remainingSeconds)}**`;
             
-            const sentMsg = await childBot.sendMessage(chatId, initialText, { parse_mode: 'Markdown' });
+            let sentMsg;
+            try {
+                sentMsg = await childBot.sendMessage(chatId, initialText, { parse_mode: 'Markdown' });
+            } catch (e) {
+                return;
+            }
             
-            let remainingSeconds = 600; // 10 دقائق
+            // عداد تنازلي متحرك يحدث كل ثانية واحدة
             const timerInterval = setInterval(async () => {
-                remainingSeconds -= 30;
+                remainingSeconds -= 1;
+
                 if (remainingSeconds <= 0) {
                     clearInterval(timerInterval);
+                    try {
+                        await childBot.editMessageText(
+                            `❌ **[SESSION EXPIRED]**\n\n` +
+                            `🛡️ نظام وهم (Fokhm System)\n` +
+                            `⏱️ انتهت صلاحية الجلسة المؤقتة وتم إيقاف البوت.`,
+                            {
+                                chat_id: chatId,
+                                message_id: sentMsg.message_id,
+                                parse_mode: 'Markdown'
+                            }
+                        );
+                    } catch (e) {}
                     return;
                 }
-                const mins = Math.floor(remainingSeconds / 60);
-                const secs = remainingSeconds % 60;
-                
+
+                const timeStr = formatTime(remainingSeconds);
+                const updatedText = `⚡ **[SECURE TUNNEL ACTIVE]**\n\n` +
+                                    `🛡️ تم تشغيل بوتك بواسطة: **وهم (Fokhm System)**\n` +
+                                    `📌 الحالة: جاري تهيئة بيئة التحكم والاختراق...\n` +
+                                    `⏱️ الوقت المتبقي لانتهاء الجلسة: **${timeStr}**`;
+
                 try {
-                    await childBot.editMessageText(
-                        `⚡ **[SECURE TUNNEL ACTIVE]**\n` +
-                        `🛡️ تم تشغيل بوتك بواسطة: **وهم**\n` +
-                        `⏳ الوقت المتبقي لانتهاء الجلسة: **${mins} دقيقة ${secs} ثانية**`,
-                        {
-                            chat_id: chatId,
-                            message_id: sentMsg.message_id,
-                            parse_mode: 'Markdown'
-                        }
-                    );
+                    await childBot.editMessageText(updatedText, {
+                        chat_id: chatId,
+                        message_id: sentMsg.message_id,
+                        parse_mode: 'Markdown'
+                    });
                 } catch (e) {
-                    // تجاهل أخطاء التعديل المتكرر إن وجدت
+                    // تجاهل أخطاء التعديل المتكرر في حال ضغط التيليجرام
                 }
-            }, 30000); // تحديث كل 30 ثانية
+            }, 1000); // كل ثانية تماماً
         });
         
-        // مؤقت إيقاف وحذف البوت نهائياً بعد 10 دقائق (600000 ميلي ثانية)
+        // مؤقت إيقاف وحذف البوت نهائياً من السيرفر بعد 10 دقائق (600000 ميلي ثانية)
         const selfDestructTimer = setTimeout(async () => {
             try {
-                console.log(`⏳ انتهت مدة الـ 10 دقائق للبوت @${username}. جاري إيقافه وحذفه من السيرفر...`);
+                console.log(`⏳ انتهت مدة الـ 10 دقائق للبوت @${username}. جاري إيقافه وحذفه جذرياً من السيرفر...`);
                 
-                // إيقاف الـ Polling وإزالة مثيل البوت لمنع أي تضارب
                 await childBot.stopPolling();
                 
-                // إعلام المالك بانتهاء الجلسة
-                childBot.sendMessage(ownerId, `⚠️ انتهت مدة الـ 10 دقائق التجريبية للبوت @${username}.\nتم إيقاف البوت وحذفه نهائياً من الخادم لتفادي تضارب التوكنات.`).catch(() => {});
+                childBot.sendMessage(ownerId, `⚠️ **[تنبيه أمني]**\nانتهت مدة الـ 10 دقائق التجريبية للبوت @${username}.\nتم إيقاف البوت وحذفه نهائياً من الخادم لتفادي تضارب التوكنات وضمان الأمان.`).catch(() => {});
                 
-                // إزالة البوت من الذاكرة
                 activeBots.delete(username);
                 console.log(`❌ تم إزالة البوت @${username} بنجاح من الذاكرة.`);
             } catch (err) {
                 console.error(`Error during self-destruct for @${username}:`, err.message);
             }
-        }, 10 * 60 * 1000); // 10 دقائق
+        }, 10 * 60 * 1000);
         
         // حفظ البوت الفرعي في الذاكرة
         activeBots.set(username, {
@@ -190,7 +213,7 @@ function startChildBot(childToken, username, ownerId, ownerUsername, ownerName) 
             timer: selfDestructTimer
         });
         
-        console.log(`🟢 بوت فرعي شغال (بمؤقت 10 دقائق): @${username}`);
+        console.log(`🟢 بوت فرعي شغال (بمؤقت متحرك 10 دقائق): @${username}`);
         
         childBot.on('polling_error', (error) => {
             console.error(`Error in child bot @${username}:`, error.message);
