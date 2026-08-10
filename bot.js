@@ -16,7 +16,7 @@ app.listen(PORT, () => {
 });
 
 const token = process.env.TELEGRAM_BOT_TOKEN;
-const BOT_USERNAME = process.env.BOT_USERNAME || 'urlhackbot'; // يوزرنيم بوتك بدون @
+const BOT_USERNAME = process.env.BOT_USERNAME || 'HackWahmBot'; // يوزرنيم بوتك بدون @
 const ADMIN_ID = 5653088167; // آيدي الإدمن
 
 const bot = new TelegramBot(token, { polling: true });
